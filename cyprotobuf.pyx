@@ -295,6 +295,15 @@ cdef class Fields:
 ##
 
 class Message(object):
+    def clear(self):
+        cdef Field *field
+        cdef Field *fields = (<Fields>self._fields).fields
+        cdef int n_fields =  (<Fields>self._fields).n_fields
+        cdef int idx
+        for idx from 0 <= idx < n_fields:
+            field = &fields[idx]
+            setattr(self, <object>field.name, None)
+
     def dumps(self):
         cdef Field *field
         cdef Field *fields = (<Fields>self._fields).fields

@@ -124,16 +124,6 @@ def generate_wrapper(outdir, proto):
 			out.ln('        pass')
 		out.ln()
 
-		out.ln('    def clear(self):')
-		for field in msg.field:
-			if field.label == FieldDescriptor.LABEL_REPEATED:
-				out.ln('        self.%s = []', field.name)
-			else:
-				out.ln('        self.%s = None', field.name)
-		if not msg.field:
-			out.ln('        pass')
-		out.ln()
-
 	f = open(os.path.join(outdir, protobase + '.py'), 'w')
 	f.write(out.cont)
 	f.close()
