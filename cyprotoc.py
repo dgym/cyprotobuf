@@ -94,12 +94,13 @@ def generate_wrapper(outdir, proto):
 
 	out.ln('import cyprotobuf')
 	out.ln()
+	out.ln()
 	
 	for msg in file.message_type:
 		out.ln('class %s(cyprotobuf.Message):' % msg.name)
-		out.ln('  _fields = cyprotobuf.Fields(')
+		out.ln('    _fields = cyprotobuf.Fields(')
 		for field in msg.field:
-			out.ln('    (cyprotobuf.%s, %s, %s, %s),',
+			out.ln('        (cyprotobuf.%s, %s, %s, %s),',
 					LABELMAP[field.label],
 					field.type == field.TYPE_MESSAGE and field.type_name[1:] or ('cyprotobuf.' + TYPEMAP[field.type]),
 					repr(field.name),
@@ -107,30 +108,30 @@ def generate_wrapper(outdir, proto):
 		out.ln('    )')
 		out.ln()
 
-		out.ln('  __slots__ = [ %s ]',
+		out.ln('    __slots__ = [ %s ]',
 				', '.join([ repr(field.name) for field in msg.field ]))
 		out.ln()
 
 
-		out.ln('  def __init__(%s):',
-				', '.join(['self'] + ['%s = None' % field.name for field in msg.field]))
+		out.ln('    def __init__(%s):',
+				', '.join(['self'] + ['%s=None' % field.name for field in msg.field]))
 		for field in msg.field:
 			if field.label == FieldDescriptor.LABEL_REPEATED:
-				out.ln('    self.%s = %s or []', field.name, field.name)
+				out.ln('        self.%s = %s or []', field.name, field.name)
 			else:
-				out.ln('    self.%s = %s', field.name, field.name)
-		else:
-			out.ln('    pass')
+				out.ln('        self.%s = %s', field.name, field.name)
+		if not msg.field:
+			out.ln('        pass')
 		out.ln()
 
-		out.ln('  def Clear(self):')
+		out.ln('    def clear(self):')
 		for field in msg.field:
 			if field.label == FieldDescriptor.LABEL_REPEATED:
-				out.ln('    self.%s = []', field.name)
+				out.ln('        self.%s = []', field.name)
 			else:
-				out.ln('    self.%s = None', field.name)
-		else:
-			out.ln('    pass')
+				out.ln('        self.%s = None', field.name)
+		if not msg.field:
+			out.ln('        pass')
 		out.ln()
 
 	f = open(os.path.join(outdir, protobase + '.py'), 'w')

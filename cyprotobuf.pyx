@@ -48,7 +48,6 @@ cdef int VarIntWireType_get_length(DataBlock *block) except -1:
         else:
             return l
     raise IndexError()
-    return -1
 
 VarIntWireType = WireType(0, VarIntWireType_get_length)
 
@@ -116,7 +115,6 @@ cdef int64 decode_straight(DataBlock *block) except? -1:
             block.start = idx + 1
             return val
     raise IndexError()
-    return -1
 
 cdef int64 decode_zigzag(DataBlock *block) except? -1:
     cdef int64 val
@@ -293,39 +291,11 @@ cdef class Fields:
 
 
 ##
-## test
-##
-
-cdef hex(bytes):
-    return ' '.join(['%02x' % ord(c) for c in bytes])
-#cdef int i
-#cdef DataBlock data
-#if __name__ == '__main__':
-#
-#
-#    print 'straight'
-#    for v in (0, 1, 2, 123456789123456789, -1, -2):
-#        d = encode_straight(v)
-#        dd = d + d
-#        data = DataBlock(dd, 0, len(dd))
-#        a = decode_straight(&data)
-#        b = decode_straight(&data)
-#        print '  %s -> "%s" -> %s (%s)' % (v, hex(d), a, b)
-#    print 'zigzag'
-#    for v in (0, 1, 2, 123456789123456789, -1, -2):
-#        d = encode_zigzag(v)
-#        dd = d + d
-#        data = DataBlock(dd, 0, len(dd))
-#        a = decode_zigzag(&data)
-#        b = decode_zigzag(&data)
-#        print '  %s -> "%s" -> %s (%s)' % (v, hex(d), a, b)
-
-##
 ## The Message class
 ##
 
 class Message(object):
-    def SerializeToString(self):
+    def dumps(self):
         cdef Field *field
         cdef Field *fields = (<Fields>self._fields).fields
         cdef int n_fields =  (<Fields>self._fields).n_fields
@@ -354,7 +324,7 @@ class Message(object):
                     data += encode(item)
         return data
 
-    def ParseFromString(self, data, start = 0, end = -1):
+    def loads(self, data, start=0, end=-1):
         if end < 0:
             end += len(data) + 1
 
