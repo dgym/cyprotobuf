@@ -7,7 +7,7 @@ from cpython cimport Py_DECREF, Py_INCREF
 cdef extern from "Python.h":
     object PyString_FromStringAndSize(char *v, int len)
 
-cdef extern from *:
+cdef extern from "stdint.h":
     ctypedef int int64 "int64_t"
     ctypedef int uint64 "uint64_t"
     ctypedef int uint8 "uint8_t"
