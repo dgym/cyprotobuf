@@ -322,12 +322,37 @@ cdef class Fields:
 class Message(object):
     def clear(self):
         cdef Field *field
-        cdef Field *fields = (<Fields>self._fields).fields
-        cdef int n_fields =  (<Fields>self._fields).n_fields
+        cdef Field *fields = (<Fields?>self._fields).fields
+        cdef int n_fields =  (<Fields?>self._fields).n_fields
         cdef int idx
         for idx from 0 <= idx < n_fields:
             field = &fields[idx]
             setattr(self, <object>field.name, [] if field.flag == REPEATED else None)
+
+    def as_dict(self, strip_none=True):
+        d = {}
+        cdef Field *field
+        cdef Field *fields = (<Fields?>self._fields).fields
+        cdef int n_fields =  (<Fields?>self._fields).n_fields
+        cdef int idx
+        for idx from 0 <= idx < n_fields:
+            field = &fields[idx]
+            name = <object>field.name
+            value = getattr(self, name)
+            if strip_none and value is None:
+                continue
+
+            if field.flag == REPEATED:
+                if field.message != NULL:
+                    d[name] = [m.as_dict(strip_none) for m in value]
+                else:
+                    d[name] = map(str, value)
+            else:
+                if field.message != NULL:
+                    d[name] = value.as_dict(strip_none)
+                else:
+                    d[name] = str(value)
+        return d
 
     def dumps(self):
         cdef Field *field

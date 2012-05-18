@@ -112,7 +112,6 @@ def generate_wrapper(outdir, proto):
 				', '.join([ repr(field.name) for field in msg.field ]))
 		out.ln()
 
-
 		out.ln('    def __init__(%s):',
 				', '.join(['self'] + ['%s=None' % field.name for field in msg.field]))
 		for field in msg.field:
