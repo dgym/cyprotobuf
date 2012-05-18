@@ -20,7 +20,7 @@ TYPEMAP = {
 		FieldDescriptor.TYPE_ENUM : 'type_enum',
 		FieldDescriptor.TYPE_FIXED32 : None,
 		FieldDescriptor.TYPE_FIXED64 : None,
-		FieldDescriptor.TYPE_FLOAT : None,
+		FieldDescriptor.TYPE_FLOAT : 'type_float',
 		FieldDescriptor.TYPE_GROUP : None,
 		FieldDescriptor.TYPE_INT32 : 'type_int32',
 		FieldDescriptor.TYPE_INT64 : 'type_int64',

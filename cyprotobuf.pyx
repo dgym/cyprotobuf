@@ -8,9 +8,14 @@ cdef extern from "Python.h":
     object PyString_FromStringAndSize(char *v, int len)
 
 cdef extern from "stdint.h":
+    ctypedef int uint32 "uint32_t"
     ctypedef int int64 "int64_t"
     ctypedef int uint64 "uint64_t"
     ctypedef int uint8 "uint8_t"
+
+cdef extern from "netinet/in.h":
+    uint32 ntohl(uint32)
+    uint32 htonl(uint32)
 
 ##
 ## forward declarations
@@ -245,6 +250,26 @@ cdef object FieldTypeStringDecode(DataBlock *block):
 type_string = make_field_type(FieldTypeStruct(LengthDelimWireType, FieldTypeStringEncode, FieldTypeStringDecode))
 type_bytes = type_string
 
+# float
+cdef union float_int:
+    float f
+    uint32 i
+
+cdef object FieldTypeFloatEncode(object value):
+    cdef float_int v
+    v.f = value
+    v.i = htonl(v.i)
+    return PyString_FromStringAndSize(<char *>&v.i, 4)
+
+cdef object FieldTypeFloatDecode(DataBlock *block):
+    cdef float_int v
+    v.i = (<uint32 *>(&block.data[block.start]))[0]
+    v.i = ntohl(v.i)
+    block.start += 4
+    return v.f
+
+type_float = make_field_type(FieldTypeStruct(Fixed32WireType, FieldTypeFloatEncode, FieldTypeFloatDecode))
+
 # message
 cdef FieldTypeStruct message_field_type_struct = FieldTypeStruct(LengthDelimWireType, NULL, NULL)
 
@@ -302,13 +327,13 @@ class Message(object):
         cdef int idx
         for idx from 0 <= idx < n_fields:
             field = &fields[idx]
-            setattr(self, <object>field.name, None)
+            setattr(self, <object>field.name, [] if field.flag == REPEATED else None)
 
     def dumps(self):
         cdef Field *field
         cdef Field *fields = (<Fields>self._fields).fields
         cdef int n_fields =  (<Fields>self._fields).n_fields
-        cdef FieldTypeEncodeFn *encode
+        cdef FieldTypeEncodeFn *encode = NULL
         cdef int wire_type_id, idx
         data = ''
         for idx from 0 <= idx < n_fields:
@@ -328,7 +353,7 @@ class Message(object):
                 data += encode_straight((field.id << 3) | wire_type_id)
                 # add the encoded field
                 if field.message != NULL:
-                    data += encode_string(item.SerializeToString())
+                    data += encode_string(item.dumps())
                 else:
                     data += encode(item)
         return data
@@ -342,7 +367,7 @@ class Message(object):
 
 
 cdef object _ParseFromString(object self, DataBlock *block):
-    self.Clear()
+    self.clear()
 
     # while we have remaining data, parse a field
     cdef int64 field_info, field_id, wire_type
