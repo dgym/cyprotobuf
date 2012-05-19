@@ -329,7 +329,7 @@ class Message(object):
             field = &fields[idx]
             setattr(self, <object>field.name, [] if field.flag == REPEATED else None)
 
-    def as_dict(self, strip_none=True):
+    def as_dict(self, terse=True):
         d = {}
         cdef Field *field
         cdef Field *fields = (<Fields?>self._fields).fields
@@ -339,17 +339,20 @@ class Message(object):
             field = &fields[idx]
             name = <object>field.name
             value = getattr(self, name)
-            if strip_none and value is None:
-                continue
+            if terse:
+                if value is None:
+                    continue
+                if field.flag == REPEATED and not len(value):
+                    continue
 
             if field.flag == REPEATED:
                 if field.message != NULL:
-                    d[name] = [m.as_dict(strip_none) for m in value]
+                    d[name] = [m.as_dict(terse) for m in value]
                 else:
                     d[name] = map(str, value)
             else:
                 if field.message != NULL:
-                    d[name] = value.as_dict(strip_none)
+                    d[name] = value.as_dict(terse)
                 else:
                     d[name] = str(value)
         return d
