@@ -349,12 +349,12 @@ class Message(object):
                 if field.message != NULL:
                     d[name] = [m.as_dict(terse) for m in value]
                 else:
-                    d[name] = map(str, value)
+                    d[name] = value
             else:
                 if field.message != NULL:
                     d[name] = value.as_dict(terse)
                 else:
-                    d[name] = str(value)
+                    d[name] = value
         return d
 
     def dumps(self):
