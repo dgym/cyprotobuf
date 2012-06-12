@@ -103,13 +103,13 @@ def generate_wrapper(outdir, proto):
 			out.ln('        (cyprotobuf.%s, %s, %s, %s),',
 					LABELMAP[field.label],
 					field.type == field.TYPE_MESSAGE and field.type_name[1:] or ('cyprotobuf.' + TYPEMAP[field.type]),
-					repr(field.name),
+					repr(str(field.name)),
 					field.number)
 		out.ln('    )')
 		out.ln()
 
 		out.ln('    __slots__ = [ %s ]',
-				', '.join([ repr(field.name) for field in msg.field ]))
+				', '.join([ repr(str(field.name)) for field in msg.field ]))
 		out.ln()
 
 		out.ln('    def __init__(%s):',
@@ -143,4 +143,4 @@ if __name__ == '__main__':
 		if arg.startswith('-'):
 			continue
 		if not generate_wrapper(outdir, arg):
-			break
+			sys.exit(1)
