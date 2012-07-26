@@ -8,6 +8,7 @@ cdef extern from "Python.h":
     object PyString_FromStringAndSize(char *v, int len)
 
 cdef extern from "stdint.h":
+    ctypedef int int32 "int32_t"
     ctypedef int uint32 "uint32_t"
     ctypedef int int64 "int64_t"
     ctypedef int uint64 "uint64_t"
@@ -269,6 +270,20 @@ cdef object FieldTypeFloatDecode(DataBlock *block):
     return v.f
 
 type_float = make_field_type(FieldTypeStruct(Fixed32WireType, FieldTypeFloatEncode, FieldTypeFloatDecode))
+
+# fixed32
+cdef object FieldTypeFixed32Encode(object value):
+    cdef int32 v = value
+    cdef uint32 u = htonl((<uint32 *>(&v))[0])
+    return PyString_FromStringAndSize(<char *>&u, 4)
+
+cdef object FieldTypeFixed32Decode(DataBlock *block):
+    cdef uint32 v = (<uint32 *>(&block.data[block.start]))[0]
+    v = ntohl(v)
+    block.start += 4
+    return (<int32 *>(&v))[0]
+
+type_fixed32 = make_field_type(FieldTypeStruct(Fixed32WireType, FieldTypeFixed32Encode, FieldTypeFixed32Decode))
 
 # message
 cdef FieldTypeStruct message_field_type_struct = FieldTypeStruct(LengthDelimWireType, NULL, NULL)

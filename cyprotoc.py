@@ -18,7 +18,7 @@ TYPEMAP = {
 		FieldDescriptor.TYPE_BYTES : 'type_bytes',
 		FieldDescriptor.TYPE_DOUBLE : None,
 		FieldDescriptor.TYPE_ENUM : 'type_enum',
-		FieldDescriptor.TYPE_FIXED32 : None,
+		FieldDescriptor.TYPE_FIXED32 : 'type_fixed32',
 		FieldDescriptor.TYPE_FIXED64 : None,
 		FieldDescriptor.TYPE_FLOAT : 'type_float',
 		FieldDescriptor.TYPE_GROUP : None,
