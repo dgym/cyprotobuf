@@ -14,7 +14,7 @@ cdef extern from "stdint.h":
     ctypedef int uint64 "uint64_t"
     ctypedef int uint8 "uint8_t"
 
-cdef extern from "netinet/in.h":
+cdef extern from "utils.h":
     uint32 ntohl(uint32)
     uint32 htonl(uint32)
 
